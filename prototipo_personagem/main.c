@@ -1,12 +1,10 @@
 #include <assert.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
-#include <SDL2/SDL_ttf.h>
 #include <stdbool.h>
 #include <stdio.h> 
 #include <stdlib.h> 
 #include <time.h>    
-#include <string.h> 
 
 
 #define WINDOW_WIDTH 1920
@@ -103,7 +101,6 @@ typedef struct {
     bool coletada;
 } Reliquia;
 
-// STRUCT: Tesouro
 typedef struct {
     TipoTesouro tipo;
     int x, y;
@@ -210,7 +207,7 @@ void find_valid_spawn(int* out_x, int* out_y, int entity_w, int entity_h, int pl
                 int dy = potential_y - player_start_y;
                 int dist2 = dx*dx + dy*dy;
                 
-                // Distância mínima em pixels (MIN_SPAWN_DIST_TILES * TILE_SIZE)^2
+                // Distância mínima em pixels
                 if (dist2 > (MIN_SPAWN_DIST_TILES * TILE_SIZE) * (MIN_SPAWN_DIST_TILES * TILE_SIZE)) {
                     *out_x = potential_x;
                     *out_y = potential_y;
@@ -224,40 +221,11 @@ void find_valid_spawn(int* out_x, int* out_y, int entity_w, int entity_h, int pl
     *out_y = player_start_y;
 }
 
-// NOVO: Função auxiliar para renderizar texto
-void render_text(SDL_Renderer* ren, TTF_Font* font, const char* text, int x, int y, SDL_Color color) {
-    if (font == NULL || text == NULL || strlen(text) == 0) return;
-
-    SDL_Surface* surface = TTF_RenderText_Blended(font, text, color);
-    if (surface == NULL) {
-        fprintf(stderr, "Erro ao renderizar texto: %s\n", TTF_GetError());
-        return;
-    }
-
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(ren, surface);
-    if (texture == NULL) {
-        fprintf(stderr, "Erro ao criar textura de texto: %s\n", SDL_GetError());
-        SDL_FreeSurface(surface);
-        return;
-    }
-
-    SDL_Rect dstRect = {x, y, surface->w, surface->h};
-    SDL_RenderCopy(ren, texture, NULL, &dstRect);
-
-    SDL_DestroyTexture(texture);
-    SDL_FreeSurface(surface);
-}
-
 
 int main(int argc, char* args[]) {
     srand(time(NULL));
 
     SDL_Init(SDL_INIT_EVERYTHING);
-    
-    if (TTF_Init() == -1) {
-        fprintf(stderr, "SDL_ttf não pôde ser inicializado! SDL_ttf Error: %s\n", TTF_GetError());
-        return 1;
-    }
     
     SDL_Window* win = SDL_CreateWindow("A Reliquia Perdida",
                                        SDL_WINDOWPOS_CENTERED,
@@ -275,10 +243,6 @@ int main(int argc, char* args[]) {
     SDL_Texture* img_calice = IMG_LoadTexture(ren, "calice.png");
     SDL_Texture* img_vida = IMG_LoadTexture(ren, "vida.png");
     SDL_Texture* img_vida2 = IMG_LoadTexture(ren, "vida2.png");
-
-
-    TTF_Font* font = TTF_OpenFont("tiny.ttf", 24); 
-
     assert(img != NULL);
     assert(img2 != NULL);
     assert(img3 != NULL);
@@ -349,12 +313,13 @@ int main(int argc, char* args[]) {
 
     for(int i = 0; i < MUMMY_COUNT; i++) {
         int mx, my;
+        // encontrar uma posição segura
         find_valid_spawn(&mx, &my, 40, 40, jogador.x, jogador.y); 
 
         mummies[i] = (Mumia){
             .estado = MUMIA_DORMINDO,
-            .x = mx, 
-            .y = my, 
+            .x = mx, // Posição segura
+            .y = my, // Posição segura
             .w = 60,
             .h = 60,
             .vida = 100,
@@ -376,8 +341,8 @@ int main(int argc, char* args[]) {
 
         dancers[i] = (Dancarina){
             .estadoAtual = PARADA,
-            .x = dx, 
-            .y = dy, 
+            .x = dx, // Posição segura
+            .y = dy, // Posição segura
             .w = 60,
             .h = 60,
             .vida = 100,
@@ -397,9 +362,11 @@ int main(int argc, char* args[]) {
 
     for(int i = 0; i < NUM_TREASURES_TO_SPAWN; i++) {
         int tx, ty;
+        // Chama a função para encontrar uma posição segura
         find_valid_spawn(&tx, &ty, 30, 30, jogador.x, jogador.y); 
 
         TipoTesouro tipo;
+        // Para garantir que os dois tesouros apareçam:
         if (i == 0) tipo = TESOURO_TOCHA;
         else tipo = TESOURO_CALICE_SAGRADO;
 
@@ -425,11 +392,6 @@ int main(int argc, char* args[]) {
     Uint32 tempoHipnoseInicio = 0;
     
     bool game_over = false; 
-    
-    char current_message[256] = ""; 
-    Uint32 message_start_time = 0; 
-    const Uint32 MESSAGE_DURATION = 3000; // 3 segundos
-
     bool rodando = true;
     SDL_Event evt;
     Uint32 espera = 10;
@@ -497,8 +459,9 @@ int main(int argc, char* args[]) {
                 printf("!! GAME OVER !!\n");
                 printf("============================================\n");
             } else {
-                snprintf(current_message, 256, "Voce perdeu uma vida! Vidas restantes: %d", jogador.vidas);
-                message_start_time = SDL_GetTicks();
+                // RESPONS
+                printf("\nVocê perdeu uma vida! Vidas restantes: %d\n", jogador.vidas);
+                
                 // Reinicia a vida e teletransporta para o spawn
                 jogador.vida = 100;
                 jogador.x = respawn_x;
@@ -506,6 +469,8 @@ int main(int argc, char* args[]) {
                 jogador.hipnotizado = false; 
                 jogador.enrolado = false;
                 estado = PARADO; 
+                
+                // Os itens coletados não são resetados.
             }
         }
 
@@ -518,8 +483,7 @@ int main(int argc, char* args[]) {
              jogador.y + PLAYER_HEIGHT > relic.y) 
           {
             relic.coletada = true;
-            snprintf(current_message, 256, "Reliquia Coletada! Encontre a Saida!");
-            message_start_time = SDL_GetTicks();
+            printf("Relíquia Coletada! Agora encontre a Saída (Tile Vermelho)!\n");
           }
        }
 
@@ -536,28 +500,25 @@ int main(int argc, char* args[]) {
             {
                 t->coletado = true;
                 
-                // LÓGICA DE EFEITO
                 switch(t->tipo) {
                     case TESOURO_TOCHA: 
-                        snprintf(current_message, 256, "TOCHA Coletada! Visao Aumentada.");
+                        printf("Tesouro Coletado: TOCHA! Sua visão parece mais clara. (Efeito Futuro: Aumentar visao)\n");
                         visaoExtra = true;
                         break;
                     case TESOURO_CALICE_SAGRADO: 
-                        snprintf(current_message, 256, "CALICE SAGRADO Coletado! Voce sente uma nova força.");
-                        jogador.vidas++;
+                        printf("Tesouro Coletado: CÁLICE SAGRADO! Você sente uma nova força. (Efeito Futuro: Vida Extra)\n");
                         break;
                     case TESOURO_PERGAMINHO: 
-                        snprintf(current_message, 256, "PERGAMINHO Coletado! O mapa se clareia.");
+                        printf("Tesouro Coletado: PERGAMINHO! O mapa se clareia. (Efeito Futuro: Indica Saída)\n");
                         break;
                     case TESOURO_MALCIDAO: 
-                        snprintf(current_message, 256, "MALDIÇÃO! Você perdeu 40 de vida.");
-                        jogador.vida -= 40; 
+                        printf("Tesouro Coletado: MALDIÇÃO! Você recebeu 20 de dano. (Efeito Futuro: Causa Dano)\n");
+                        jogador.vida -= 20; // Aplica o dano imediatamente
                         break;
                     case TESOURO_ESTATUETA: 
-                        snprintf(current_message, 256, "ESTATUETA Coletada! Você se sente desorientado.");
+                        printf("Tesouro Coletado: ESTATUETA! Você se sente desorientado. (Efeito Futuro: Teleporta)\n");
                         break;
                 }
-                message_start_time = SDL_GetTicks(); // Inicia o timer da mensagem
             }
         }
 
@@ -573,11 +534,10 @@ if (tile_exit_y >= 0 && tile_exit_y < MAP_HEIGHT_TILES &&
 {
     if (map[tile_exit_y][tile_exit_x] == 3) {
         if (relic.coletada) {
-            snprintf(current_message, 256, "PARABENS! Voce escapou com a Reliquia!");
-            message_start_time = SDL_GetTicks();
+            printf("\nPARABÉNS! Você escapou com a Relíquia!\n");
+            rodando = false; // Fim do jogo
         } else {
-            snprintf(current_message, 256, "Saida Bloqueada! Colete a Reliquia primeiro.");
-            message_start_time = SDL_GetTicks();
+            printf("\nA Saída está bloqueada! Você deve primeiro coletar a Relíquia!\n");
         }
     }
 }
@@ -601,6 +561,7 @@ if (tile_exit_y >= 0 && tile_exit_y < MAP_HEIGHT_TILES &&
                         danca->estadoAtual = DANCANDO;
                         danca->tempoEstado = SDL_GetTicks();
                     } else {
+                        // Patrulhamento em Corredor
                         if (danca->dirX == 0 && danca->dirY == 0) {
                             if (rand() % 2 == 0) {
                                 danca->dirX = (rand() % 2 == 0) ? 1 : -1;
@@ -650,6 +611,7 @@ if (tile_exit_y >= 0 && tile_exit_y < MAP_HEIGHT_TILES &&
                     break;
             }
 
+            // Aplica o movimento da dançarina com COLISÃO
             if (move_x != 0 || move_y != 0) {
                 int new_dx = danca->x + move_x;
                 int new_dy = danca->y + move_y;
@@ -733,6 +695,7 @@ if (tile_exit_y >= 0 && tile_exit_y < MAP_HEIGHT_TILES &&
                     break;
             }
             
+            // Aplica o movimento da múmia com colisão
             if (move_x != 0 || move_y != 0) {
                 int new_mx = mumia->x + move_x;
                 int new_my = mumia->y + move_y;
@@ -843,6 +806,7 @@ if (tile_exit_y >= 0 && tile_exit_y < MAP_HEIGHT_TILES &&
                 default: break;
             }
             
+            // Aplica o movimento do jogador com colisão
             update_position(&jogador.x, &jogador.y, move_x, move_y);
 
         } else if (jogador.hipnotizado) {
@@ -896,6 +860,7 @@ if (tile_exit_y >= 0 && tile_exit_y < MAP_HEIGHT_TILES &&
                 relic.w,
                 relic.h
             };
+            // Cor da Relíquia (Ouro)
             SDL_SetRenderDrawColor(ren, 255, 215, 0, 255); 
             SDL_RenderFillRect(ren, &rRelic);
         }
@@ -912,23 +877,17 @@ if (tile_exit_y >= 0 && tile_exit_y < MAP_HEIGHT_TILES &&
                 t_render->h
             };
             
+            SDL_Color corTesouro;
+            
+            // Cores baseadas no tipo de tesouro
             switch(t_render->tipo) {
-                case TESOURO_TOCHA: 
-                    SDL_RenderCopy(ren, img_tocha, NULL, &rTesouro); 
-                    break; 
-                case TESOURO_CALICE_SAGRADO: 
-                    SDL_RenderCopy(ren, img_calice, NULL, &rTesouro);
-                    break;
-                case TESOURO_PERGAMINHO: 
-                    SDL_SetRenderDrawColor(ren, 245,222,179,255); SDL_RenderFillRect(ren, &rTesouro); 
-                    break;
-                case TESOURO_MALCIDAO: 
-                    SDL_SetRenderDrawColor(ren, 100,0,100,255); SDL_RenderFillRect(ren, &rTesouro);
-                    break;
-                case TESOURO_ESTATUETA: 
-                    SDL_SetRenderDrawColor(ren, 139,69,19,255); SDL_RenderFillRect(ren, &rTesouro);
-                    break;
+                case TESOURO_TOCHA: SDL_RenderCopy(ren, img_tocha, NULL, &rTesouro); break;
+                case TESOURO_CALICE_SAGRADO: SDL_RenderCopy(ren, img_calice, NULL, &rTesouro);break; // Amarelo (Ouro)
+                case TESOURO_PERGAMINHO: corTesouro=(SDL_Color){245,222,179,255}; break; // Bege (Pergaminho)
+                case TESOURO_MALCIDAO: corTesouro=(SDL_Color){100,0,100,255}; break; // Roxo (Maldição)
+                case TESOURO_ESTATUETA: corTesouro=(SDL_Color){139,69,19,255}; break; // Marrom (Estatueta)
             }
+            
         }
         
 
@@ -967,26 +926,28 @@ if (tile_exit_y >= 0 && tile_exit_y < MAP_HEIGHT_TILES &&
         else SDL_RenderCopy(ren, img2, NULL, &visao);
 
         // =======================================================
-        // --- Lógica de Renderização do HUD (Barra de Vida e Vidas) ---
+        // --- Lógica de Renderização do HUD ---
         // =======================================================
         
         // --- Barra de Vida (Fundo Cinza) ---
         SDL_Rect rVidaFundo = { 20, 20, 300, 30 };
-        SDL_SetRenderDrawColor(ren, 50, 50, 50, 255); 
+        SDL_SetRenderDrawColor(ren, 50, 50, 50, 255); // Cinza Escuro
         SDL_RenderFillRect(ren, &rVidaFundo);
 
         // --- Barra de Vida (Preenchimento) ---
+        // A largura é proporcional à vida atual
         int vida_atual_w = (int)((jogador.vida / 100.0) * 300);
         if (vida_atual_w < 0) vida_atual_w = 0;
         
         SDL_Rect rVidaAtual = { 20, 20, vida_atual_w, 30 };
         
+        // Define a cor da barra de vida com base na saúde atual
         if (jogador.vida > 50) {
-            SDL_SetRenderDrawColor(ren, 0, 200, 0, 255);
+            SDL_SetRenderDrawColor(ren, 0, 200, 0, 255); // Verde (Saúde Alta)
         } else if (jogador.vida > 20) {
-            SDL_SetRenderDrawColor(ren, 255, 255, 0, 255);
+            SDL_SetRenderDrawColor(ren, 255, 255, 0, 255); // Amarelo (Saúde Média)
         } else {
-            SDL_SetRenderDrawColor(ren, 200, 0, 0, 255);
+            SDL_SetRenderDrawColor(ren, 200, 0, 0, 255); // Vermelho (Saúde Baixa)
         }
         SDL_RenderFillRect(ren, &rVidaAtual);
         
@@ -998,31 +959,18 @@ if (tile_exit_y >= 0 && tile_exit_y < MAP_HEIGHT_TILES &&
         for (int i = 0; i < MAX_LIVES; i++) {
             SDL_Rect rLife = {
                 START_X_LIVES + i * (SQUARE_SIZE + SPACING), 
-                25, 
+                25, // Posição Y alinhada com o meio da barra
                 40, 
                 40
             };
             
             if (i < jogador.vidas) {
-                if (img_vida) SDL_RenderCopy(ren, img_vida, NULL, &rLife);
-                else { SDL_SetRenderDrawColor(ren, 255, 0, 0, 255); SDL_RenderFillRect(ren, &rLife); }
+                SDL_RenderCopy(ren, img_vida, NULL, &rLife);
             } else {
-                if (img_vida2) SDL_RenderCopy(ren, img_vida2, NULL, &rLife);
-                else { SDL_SetRenderDrawColor(ren, 120, 120, 120, 255); SDL_RenderDrawRect(ren, &rLife); }
+                // Vida perdida
+                SDL_RenderCopy(ren, img_vida2, NULL, &rLife);
             }
         }
-        
-        // --- Lógica de Renderização de Mensagens HUD ---
-        // =======================================================
-        if (font != NULL && SDL_GetTicks() - message_start_time < MESSAGE_DURATION) {
-            SDL_Color corMensagem = {255, 255, 255, 255}; // Branco
-            int text_w, text_h;
-            TTF_SizeText(font, current_message, &text_w, &text_h);
-            
-            // Renderiza no centro superior
-            render_text(ren, font, current_message, (WINDOW_WIDTH - text_w) / 2, 80, corMensagem);
-        }
-
         // =======================================================
         
         SDL_RenderPresent(ren);
@@ -1030,24 +978,18 @@ if (tile_exit_y >= 0 && tile_exit_y < MAP_HEIGHT_TILES &&
         espera = 10;
     }
     
+    // Mensagem de Game Over (nao está finalizada)
     if (game_over) {
-        snprintf(current_message, 256, "Fim de jogo! Você perdeu todas as suas vidas.");
-        message_start_time = SDL_GetTicks();
+        printf("\nFim de jogo, você perdeu todas as suas vidas!\n");
     }
 
 
-    TTF_CloseFont(font);
-    TTF_Quit();
-    
     SDL_DestroyTexture(img);
     SDL_DestroyTexture(img2);
     SDL_DestroyTexture(img3);
     SDL_DestroyTexture(img4);
     SDL_DestroyTexture(img_fundo);
-    SDL_DestroyTexture(img_tocha);
-    SDL_DestroyTexture(img_calice);
-    SDL_DestroyTexture(img_vida);
-    SDL_DestroyTexture(img_vida2);
+    SDL_DestroyTexture();
     SDL_DestroyRenderer(ren);
     SDL_DestroyWindow(win);
     SDL_Quit();
