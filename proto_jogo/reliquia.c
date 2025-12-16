@@ -1,16 +1,9 @@
-<<<<<<< HEAD
 //gcc -o reliquia reliquia.c $(pkg-config --cflags --libs sdl2 SDL2_image SDL2_ttf SDL2_mixer)
-=======
-//gcc -o reliquia main.c $(pkg-config --cflags --libs sdl2 SDL2_image SDL2_ttf)
->>>>>>> efd4f8d50efc166d813392a308a04b26ca774431
 #include <assert.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
-<<<<<<< HEAD
-#include <SDL2/SDL_mixer.h> // Inclusão do SDL_mixer - Música: areliquiaperdida-davinunes.mp3
-=======
->>>>>>> efd4f8d50efc166d813392a308a04b26ca774431
+#include <SDL2/SDL_mixer.h> 
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h> 
@@ -348,14 +341,11 @@ int main(int argc, char* args[]) {
         return 1;
     }
     
-<<<<<<< HEAD
-    // Inicialização do SDL_mixer
-    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
+    // Inicialização do SDL_mixer (BUFFER AUMENTADO)
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096) < 0) {
         fprintf(stderr, "SDL_mixer nao pode ser inicializado! Mix Error: %s\n", Mix_GetError());
     }
 
-=======
->>>>>>> efd4f8d50efc166d813392a308a04b26ca774431
     SDL_Window* win = SDL_CreateWindow("A Reliquia Perdida",
                                        SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                                        WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
@@ -375,15 +365,12 @@ int main(int argc, char* args[]) {
     SDL_Texture* img_vida = IMG_LoadTexture(ren, "vida.png");
     SDL_Texture* img_vida2 = IMG_LoadTexture(ren, "vida2.png");
     
-<<<<<<< HEAD
     // Carregamento da Música de Fundo (BGM)
     Mix_Music* bgm_musica = Mix_LoadMUS("areliquiaperdida-davinunes.mp3");
     if (bgm_musica == NULL) {
         fprintf(stderr, "Falha ao carregar musica: %s\n", Mix_GetError());
     }
 
-=======
->>>>>>> efd4f8d50efc166d813392a308a04b26ca774431
     TTF_Font* font_small = TTF_OpenFont("tiny.ttf", 24); 
     TTF_Font* font_large = TTF_OpenFont("tiny.ttf", 48); 
     
@@ -438,11 +425,8 @@ int main(int argc, char* args[]) {
     bool rodando = true;
     SDL_Event evt;
     Uint32 espera = 10;
-<<<<<<< HEAD
     
-    // AQUI REMOVEMOS A CHAMADA Mix_PlayMusic, que fazia a música tocar imediatamente.
-=======
->>>>>>> efd4f8d50efc166d813392a308a04b26ca774431
+    // A música não é tocada aqui, apenas no clique do botão 'Play'.
 
     while (rodando) {
         
@@ -852,21 +836,14 @@ int main(int argc, char* args[]) {
     TTF_CloseFont(font_small);
     TTF_CloseFont(font_large);
     TTF_Quit();
-<<<<<<< HEAD
     
-    Mix_FreeMusic(bgm_musica); // Limpeza do áudio
-    Mix_CloseAudio();          // Fechamento do subsistema de áudio
+    Mix_FreeMusic(bgm_musica); 
+    Mix_CloseAudio();          
 
-=======
->>>>>>> efd4f8d50efc166d813392a308a04b26ca774431
     SDL_DestroyRenderer(ren);
     SDL_DestroyWindow(win);
     SDL_Quit();
     return 0;
 }
 
-<<<<<<< HEAD
-//20251211033221
-=======
-//novo
->>>>>>> efd4f8d50efc166d813392a308a04b26ca774431
+//20251211033604
