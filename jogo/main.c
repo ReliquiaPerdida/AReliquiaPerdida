@@ -665,16 +665,6 @@ int main(int argc, char* args[]) {
                     if(!jogador.hipnotizado && !jogador.enrolado) {
                         switch (evt.key.keysym.sym) {
                             case SDLK_LSHIFT: if(noChao) estado = CORRENDO; break;
-                            case SDLK_SPACE:
-                                if(noChao) {
-                                    chao = jogador.y;
-                                    estado = PULANDO;
-                                    noChao = false;
-                                }
-                                break;
-                            case SDLK_k:
-                                estado = ATACANDO;
-                                break;
                             case SDLK_UP: case SDLK_DOWN: case SDLK_LEFT: case SDLK_RIGHT:
                                 if(estado != CORRENDO && estado != PULANDO && noChao)
                                     estado = ANDANDO;
