@@ -660,8 +660,10 @@ int main(int argc, char* args[]) {
            } 
             
             if (game_state == GAME_PLAYING) {
-                // Lógica de input para JOGABILIDADE
-                if (evt.type == SDL_KEYDOWN) {
+                if (evt.type == SDL_KEYDOWN) {if (evt.key.keysym.sym == SDLK_F1) {
+                        game_end_time = SDL_GetTicks();
+                        game_state = GAME_VICTORY;
+                    }
                     if(!jogador.hipnotizado && !jogador.enrolado) {
                         switch (evt.key.keysym.sym) {
                             case SDLK_LSHIFT: if(noChao) estado = CORRENDO; break;
