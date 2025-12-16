@@ -1,0 +1,15 @@
+# Regras Essenciais
+
+# Ignorar arquivos de metadados de segurança do Windows
+*Zone.Identifier
+
+# Ignorar binários e executáveis (saídas de compilação C/C++)
+*.exe
+*.o
+
+# Ignorar binários sem extensão (como o 'main' binário)
+main
+prototipo_personagem/prototipo_personagem
+
+# Regra para ignorar o arquivo bizarro que bloqueia o 'add'
+3ÄYh*

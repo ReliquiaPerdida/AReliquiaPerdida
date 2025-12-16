@@ -1,3 +1,6 @@
+//Prototipo personagem
+////gcc -o main main.c $(pkg-config --cflags --libs sdl2 SDL2_image SDL2_ttf)
+
 #include <assert.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
