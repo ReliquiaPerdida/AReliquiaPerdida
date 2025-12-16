@@ -847,3 +847,8 @@ int main(int argc, char* args[]) {
 }
 
 //20251211033604
+// Direitos autorais de imagem:
+// Múmia
+// Created by Svetlana Kushnariova (Cabbit) & Jordan Irwin (AntumDeluge)
+// Dançarina
+// Svetlana Kushnariova
