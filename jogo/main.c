@@ -539,7 +539,7 @@ int main(int argc, char* args[]) {
     SDL_Texture* img_entrada = IMG_LoadTexture(ren, "entrada.png");
     SDL_Texture* mumia_img = IMG_LoadTexture(ren, "mumia48x64.png");
     SDL_Texture* danca_img = IMG_LoadTexture(ren, "dancarina23x35.png");
-
+    SDL_Texture* img_menu_alt = IMG_LoadTexture(ren, "fundomenu2.png");
 
     Mix_Music* bgm_musica = Mix_LoadMUS("areliquiaperdida-davinunes.mp3");
     if (bgm_musica == NULL) {
@@ -564,7 +564,7 @@ int main(int argc, char* args[]) {
            img_fundo != NULL && img_menu_fundo != NULL && 
            img_mumia != NULL && img_dancarina != NULL &&
            img_tocha != NULL && img_calice != NULL && 
-           img_vida != NULL && danca_img && danca_img && img_vida2 != NULL && img_entrada != NULL && img_estatueta != NULL && img_bussola != NULL && img_reliquia);
+           img_vida != NULL && danca_img && danca_img && img_vida2 != NULL && img_entrada != NULL && img_estatueta != NULL && img_bussola != NULL && img_reliquia != NULL && img_menu_alt != NULL);
     assert(font_small != NULL && font_large != NULL);
 
 
@@ -1113,7 +1113,10 @@ int main(int argc, char* args[]) {
 
         if (game_state == GAME_MENU && img_menu_fundo != NULL) {
             SDL_RenderCopy(ren, img_menu_fundo, NULL, &rFundo);
-        } else {
+        } else if (game_state == GAME_MENU && img_menu_fundo != NULL)  {
+            SDL_RenderCopy(ren, img_menu_alt, NULL, &rFundo);
+        }
+            else {
             SDL_RenderCopy(ren, img_fundo, NULL, &rFundo); 
         }
         if (game_state == GAME_PLAYING) {
