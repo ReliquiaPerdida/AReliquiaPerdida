@@ -14,15 +14,15 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-const int WINDOW_WIDTH = 1920; 
-const int WINDOW_HEIGHT = 1080;
+const int WINDOW_WIDTH = 1366; 
+const int WINDOW_HEIGHT = 768;
 // --- Configurações do Mapa ---
 #define MAP_WIDTH_TILES 30
 #define MAP_HEIGHT_TILES 30
 #define TILE_SIZE 80
 #define RELIC_TILE 4
-#define MUMMY_COUNT 3
-#define DANCER_COUNT 3
+#define MUMMY_COUNT 5
+#define DANCER_COUNT 4
 #define PLAYER_WIDTH 60
 #define PLAYER_HEIGHT 60
 #define MIN_SPAWN_DIST_TILES 5 
@@ -552,13 +552,26 @@ int main(int argc, char* args[]) {
     SDL_Cursor* cursor_mao = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_HAND);
     SDL_Cursor* cursor_seta = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW);
 
-    const int BTN_W = 300;
-    const int BTN_H = 105;
+    // const int BTN_W = 300;
+    //const int BTN_H = 105;
 
-    SDL_Rect btn_opcoes = { 40, 940, BTN_W, BTN_H }; 
-    SDL_Rect btn_play = { 820, 946, BTN_W, BTN_H };
-    SDL_Rect btn_sair = { 1593, 948, BTN_W, BTN_H };
-    
+   // SDL_Rect btn_opcoes = { 40, 940, BTN_W, BTN_H }; 
+   // SDL_Rect btn_play = { 820, 946, BTN_W, BTN_H };
+   // SDL_Rect btn_sair = { 1593, 948, BTN_W, BTN_H };
+   const float ORIGIN_W = 1920.0f;
+   const float ORIGIN_H = 1080.0f;
+   float scale_x = (float)WINDOW_WIDTH / ORIGIN_W;
+   float scale_y = (float)WINDOW_HEIGHT / ORIGIN_H;
+   
+   int btn_w_scaled = (int) (300 * scale_x);
+   int btn_h_scaled = (int) (105 * scale_y);
+  
+   SDL_Rect btn_opcoes = { (int)(40 * scale_x), (int)(940 * scale_y), btn_w_scaled, btn_h_scaled};
+   
+      SDL_Rect btn_play = { (int)(820 * scale_x), (int)(946 * scale_y), btn_w_scaled, btn_h_scaled };
+      SDL_Rect btn_sair = { (int)(1593 * scale_x), (int)(948 * scale_y), btn_w_scaled, btn_h_scaled };
+
+
     // Verificação de texturas e fontes
     assert(img != NULL && img2 != NULL && img3 != NULL && img4 != NULL && 
            img_fundo != NULL && img_menu_fundo != NULL && 
