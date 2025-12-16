@@ -1,5 +1,5 @@
 # A Relíquia Perdida
-![Capa](media/Capa.png)
+![Capa](media/capa1.png)
  
 ## Objetivo
 
