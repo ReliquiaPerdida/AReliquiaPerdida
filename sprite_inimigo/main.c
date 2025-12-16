@@ -1,3 +1,4 @@
+//gcc -o reliquia reliquia.c $(pkg-config --cflags --libs sdl2 SDL2_image SDL2_ttf SDL2_mixer)
 #include <assert.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
