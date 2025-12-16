@@ -10,6 +10,8 @@
 # Ignorar binários sem extensão (como o 'main' binário)
 main
 prototipo_personagem/prototipo_personagem
+# Ignorar o binário da relíquia
+proto_jogo/reliquia
 
 # Regra para ignorar o arquivo bizarro que bloqueia o 'add'
 3ÄYh*
