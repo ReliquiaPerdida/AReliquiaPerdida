@@ -21,7 +21,7 @@ const int WINDOW_HEIGHT = 1080;
 #define MAP_HEIGHT_TILES 30
 #define TILE_SIZE 80
 #define RELIC_TILE 4
-#define MUMMY_COUNT 88
+#define MUMMY_COUNT 3
 #define DANCER_COUNT 3
 #define PLAYER_WIDTH 60
 #define PLAYER_HEIGHT 60
