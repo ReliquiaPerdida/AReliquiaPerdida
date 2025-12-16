@@ -1113,7 +1113,7 @@ int main(int argc, char* args[]) {
 
         if (game_state == GAME_MENU && img_menu_fundo != NULL) {
             SDL_RenderCopy(ren, img_menu_fundo, NULL, &rFundo);
-        } else if (game_state == GAME_MENU && img_menu_fundo != NULL)  {
+        } else if (game_state == GAME_OVER || game_state == GAME_VICTORY)  {
             SDL_RenderCopy(ren, img_menu_alt, NULL, &rFundo);
         }
             else {
@@ -1337,12 +1337,13 @@ int main(int argc, char* args[]) {
             SDL_Color corTitulo;
             char title_text[100];
             char option1_text[64];
+            
             if (game_state == GAME_VICTORY) {
                 corTitulo = (SDL_Color){0, 255, 0, 255};
                 snprintf(title_text, 100, "PARABENS! Voce Escapou!");
                 snprintf(option1_text, 64, "-> Jogar Novamente <-");
             } else { // GAME_OVER
-                corTitulo = (SDL_Color){0, 255, 0, 255};
+                corTitulo = (SDL_Color){255, 0, 0, 255}; // Vermelho para Game Over fica melhor
                 snprintf(title_text, 100, "Voce perdeu todas as vidas! Fim de jogo.");
                 snprintf(option1_text, 64, "-> Jogar Novamente <-");
             }
@@ -1350,13 +1351,21 @@ int main(int argc, char* args[]) {
             SDL_Color corNormal = {255, 255, 255, 255};
             SDL_Color corSelecionado = {255, 215, 0, 255}; // Dourado
 
-            render_text(ren, font_large, title_text, (WINDOW_WIDTH - 400) / 2, WINDOW_HEIGHT / 4, corTitulo);
+            // Variáveis auxiliares para medir o tamanho do texto
+            int w_text, h_text;
 
+            // 1. Título
+            TTF_SizeText(font_large, title_text, &w_text, &h_text);
+            render_text(ren, font_large, title_text, (WINDOW_WIDTH - w_text) / 2, WINDOW_HEIGHT / 4, corTitulo);
+
+            // 2. Tempo (apenas na vitória)
             if (game_state == GAME_VICTORY) {
                 Uint32 total_time = game_end_time - game_start_time;
                 char time_text[64];
                 snprintf(time_text, 64, "Tempo de Solucao: %02u:%02u", (total_time / 60000) % 60, (total_time / 1000) % 60);
-                render_text(ren, font_small, time_text, (WINDOW_WIDTH - 300) / 2, WINDOW_HEIGHT / 4 + 80, corNormal);
+                
+                TTF_SizeText(font_small, time_text, &w_text, &h_text);
+                render_text(ren, font_small, time_text, (WINDOW_WIDTH - w_text) / 2, WINDOW_HEIGHT / 4 + 80, corNormal);
             }
             
             // Opções de Menu
@@ -1364,8 +1373,13 @@ int main(int argc, char* args[]) {
             SDL_Color corOpcao1 = (selected_option == 0) ? corSelecionado : corNormal;
             SDL_Color corOpcao2 = (selected_option == 1) ? corSelecionado : corNormal;
             
-            render_text(ren, font_large, option1_text, (WINDOW_WIDTH - 400) / 2, menu_y, corOpcao1);
-            render_text(ren, font_large, "Sair do Jogo", (WINDOW_WIDTH - 250) / 2, menu_y + 80, corOpcao2);
+            // 3. Opção 1 (Jogar Novamente)
+            TTF_SizeText(font_large, option1_text, &w_text, &h_text);
+            render_text(ren, font_large, option1_text, (WINDOW_WIDTH - w_text) / 2, menu_y, corOpcao1);
+
+            // 4. Opção 2 (Sair)
+            TTF_SizeText(font_large, "Sair do Jogo", &w_text, &h_text);
+            render_text(ren, font_large, "Sair do Jogo", (WINDOW_WIDTH - w_text) / 2, menu_y + 80, corOpcao2);
         }
 
         // =======================================================
