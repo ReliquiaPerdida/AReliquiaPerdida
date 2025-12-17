@@ -890,6 +890,9 @@ int main(int argc, char* args[]) {
                         
                         if (current_phase < NUM_AREAS) {
                             // Transição para a próxima área
+                            if (jogador.vidas > 2) {
+                                jogador.vidas = 2;
+                            }
                             max_lives_total = 2;
                             initialize_phase(current_phase, &jogador, mummies, dancers, treasures, &global_relic, &visaoExtra, &possuiBussola, current_message, &message_start_time);
                         } else {
