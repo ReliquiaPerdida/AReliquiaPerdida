@@ -25,7 +25,7 @@ São itens com efeitos diversos, desconhecidos até o primeiro uso.
 * `Tocha:` Aumenta o campo de visão do personagem;
 * `Cálice:` Concede uma vida extra para o personagem;
 * `Estatueta de Cura:` O personagem recupera 40 de vida (Esse artefato aparece mais vezes no mapa);
-* `Bússola:` Mostra a localização da relíquia em relaçã á posição atual do personagem (Norte, Sul, Leste, Oeste, etc.);
+* `Bússola:` Mostra a localização da relíquia em relação á posição atual do personagem (Norte, Sul, Leste, Oeste, etc.);
 
 ### Relíquias
 Para zerar o jogo, as três relíquias devem ser coletadas. Elas serão colocadas aleatoriamente pelas áreas, cada área possui uma relíquia.
