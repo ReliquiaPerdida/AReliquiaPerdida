@@ -19,12 +19,12 @@ const int WINDOW_HEIGHT = 768;
 // --- Configurações do Mapa ---
 #define MAP_WIDTH_TILES 30
 #define MAP_HEIGHT_TILES 30
-#define TILE_SIZE 80
+#define TILE_SIZE 90
 #define RELIC_TILE 4
 #define MUMMY_COUNT 3
-#define DANCER_COUNT 4
-#define PLAYER_WIDTH 60
-#define PLAYER_HEIGHT 60
+#define DANCER_COUNT 99
+#define PLAYER_WIDTH 90
+#define PLAYER_HEIGHT 70
 #define MIN_SPAWN_DIST_TILES 5 
 
 // --- Configurações de Fases ---
@@ -35,6 +35,16 @@ const int WINDOW_HEIGHT = 768;
 
 // Configurações de Vidas (2 vidas)
 int max_lives_total = 2;
+
+// --- CONSTANTES PARA ANIMAR JOGADOR ---
+const int PLAYER_FRAME_W = 100;
+const int PLAYER_FRAME_H = 80;  
+
+// --- CONSTANTES DE COLISAO DO JOGADOR ---
+#define HITBOX_OFFSET_X 0
+#define PLAYER_HITBOX_W 40
+#define PLAYER_HITBOX_H 70 
+#define HITBOX_OFFSET_Y 0
 
 // --- MACROS E CONSTANTES DE RENDERIZAÇÃO ---
 const int MUMIA_FRAME_W = 48;
@@ -231,13 +241,13 @@ bool is_colliding(int x, int y, int w, int h) {
 void update_position(int* x, int* y, int dx, int dy) {
     // Tenta mover em X
     int new_x = *x + dx;
-    if (!is_colliding(new_x, *y, PLAYER_WIDTH, PLAYER_HEIGHT)) { 
+    if (!is_colliding(new_x + HITBOX_OFFSET_X, *y + HITBOX_OFFSET_Y, PLAYER_HITBOX_W, PLAYER_HITBOX_H)) { 
         *x = new_x;
     }
 
     // Tenta mover em Y
     int new_y = *y + dy;
-    if (!is_colliding(*x, new_y, PLAYER_WIDTH, PLAYER_HEIGHT)) { 
+    if (!is_colliding(*x + HITBOX_OFFSET_X, new_y + HITBOX_OFFSET_Y, PLAYER_HITBOX_W, PLAYER_HITBOX_H)) { 
         *y = new_y;
     }
 }
@@ -455,6 +465,7 @@ void initialize_phase(int phase_index, Jogador* jogador, Mumia mummies[], Dancar
 
     *visaoExtra = false; // Visão de tocha é resetada por fase.
     *possuiBussola = false; // Bússola é perdida ao mudar de fase
+    max_lives_total = 2;
     
     snprintf(current_message, 256, "Entrando na Area %d! Colete a reliquia para avancar.", phase_index + 1);
     *message_start_time = SDL_GetTicks();
@@ -544,6 +555,8 @@ int main(int argc, char* args[]) {
     Mix_Music* bgm_musica = Mix_LoadMUS("areliquiaperdida-davinunes.mp3");
     if (bgm_musica == NULL) {
         fprintf(stderr, "Falha ao carregar musica: %s\n", Mix_GetError());
+    } else {
+        Mix_VolumeMusic(25); // Define o volume para ~25% (Range: 0 a 128)
     }
     
     TTF_Font* font_small = TTF_OpenFont("tiny.ttf", 24); 
@@ -584,6 +597,8 @@ int main(int argc, char* args[]) {
     // --- Configuração da Câmera / HUD ---
     const int PLAYER_SCREEN_X = (WINDOW_WIDTH - PLAYER_WIDTH) / 2;
     const int PLAYER_SCREEN_Y = (WINDOW_HEIGHT - PLAYER_HEIGHT) / 2;
+    // 0=Baixo, 1=Cima, 2=Esquerda, 3=Direita
+    int direcaoOlhar = 0;
 
     SDL_Rect r = {PLAYER_SCREEN_X, PLAYER_SCREEN_Y, PLAYER_WIDTH, PLAYER_HEIGHT};
     SDL_Rect c = {0, 0, 100, 80};
@@ -799,13 +814,14 @@ int main(int argc, char* args[]) {
                             snprintf(current_message, 256, "CALICE SAGRADO Coletado! Voce foi abencoado com uma nova vida.");
                             jogador.vidas++;
                             max_lives_total++;
+                            vidaextra = true;
                             break;
                         case TESOURO_BUSSOLA:
                             snprintf(current_message, 256, "BUSSOLA ENCONTRADA! Siga a bussola para encontrar a reliquia!");
                             possuiBussola = true;
                             break;
                         case TESOURO_ESTATUETA: 
-                            // ALTERADO: Recupera 40 de vida
+                            // Recupera 40 de vida
                             jogador.vida += 40;
                             if (jogador.vida > 100) jogador.vida = 100; // Limita a 100
                             
@@ -833,7 +849,7 @@ int main(int argc, char* args[]) {
                         current_phase++;
                         
                         if (current_phase < NUM_AREAS) {
-                            // Transição bem-sucedida para a próxima área
+                            // Transição para a próxima área
                             initialize_phase(current_phase, &jogador, mummies, dancers, treasures, &global_relic, &visaoExtra, &possuiBussola, current_message, &message_start_time);
                         } else {
                             // FIM DO JOGO (Vitória final)
@@ -909,6 +925,7 @@ int main(int argc, char* args[]) {
                             danca->estadoAtual = ATORDOADA;
                             jogador.hipnotizado = false; 
                         }
+                        estado = PARADO;
                         break;
                     case ATORDOADA:
                         if (SDL_GetTicks() - danca->tempoEstado > 2000) {
@@ -1028,18 +1045,18 @@ int main(int argc, char* args[]) {
                 switch(estado) {
                     case ANDANDO:
                         vel = 1;
-                        if(teclas[SDL_SCANCODE_UP]) { move_y = -vel; c = (aux==1)? (SDL_Rect){200,0,100,80} : (SDL_Rect){100,0,100,80}; }
-                        if(teclas[SDL_SCANCODE_DOWN]) { move_y = vel; c = (aux==1)? (SDL_Rect){200,0,100,80} : (SDL_Rect){100,0,100,80}; }
-                        if(teclas[SDL_SCANCODE_LEFT]) { move_x = -vel; c = (SDL_Rect){200,0,100,80}; aux=1; }
-                        if(teclas[SDL_SCANCODE_RIGHT]) { move_x = vel; c = (SDL_Rect){100,0,100,80}; aux=2; }
+                        if(teclas[SDL_SCANCODE_UP]) { move_y = -vel; direcaoOlhar = 1; }
+                        if(teclas[SDL_SCANCODE_DOWN]) { move_y = vel; direcaoOlhar = 0; }
+                        if(teclas[SDL_SCANCODE_LEFT]) { move_x = -vel; direcaoOlhar = 2; }
+                        if(teclas[SDL_SCANCODE_RIGHT]) { move_x = vel; direcaoOlhar = 3; }
                         break;
 
                     case CORRENDO:
                         vel = 2;
-                        if(teclas[SDL_SCANCODE_UP]) { move_y = -vel; c = (aux==1)? (SDL_Rect){590,0,100,80} : (SDL_Rect){490,0,100,80}; }
-                        if(teclas[SDL_SCANCODE_DOWN]) { move_y = vel; c = (aux==1)? (SDL_Rect){590,0,100,80} : (SDL_Rect){490,0,100,80}; }
-                        if(teclas[SDL_SCANCODE_LEFT]) { move_x = -vel; c = (SDL_Rect){590,0,100,80}; aux=1; }
-                        if(teclas[SDL_SCANCODE_RIGHT]) { move_x = vel; c = (SDL_Rect){490,0,100,80}; aux=2; }
+                        if(teclas[SDL_SCANCODE_UP]) { move_y = -vel; direcaoOlhar = 1; }
+                        if(teclas[SDL_SCANCODE_DOWN]) { move_y = vel; direcaoOlhar = 0; }
+                        if(teclas[SDL_SCANCODE_LEFT]) { move_x = -vel; direcaoOlhar = 2;  }
+                        if(teclas[SDL_SCANCODE_RIGHT]) { move_x = vel; direcaoOlhar = 3; }
                         break;
 
                     case PULANDO:
@@ -1138,6 +1155,9 @@ int main(int argc, char* args[]) {
             
             int camera_offset_x = jogador.x - PLAYER_SCREEN_X;
             int camera_offset_y = jogador.y - PLAYER_SCREEN_Y;
+            c.y = 0; 
+            c.w = PLAYER_FRAME_W;
+            c.h = PLAYER_FRAME_H;
             
             // 1. Renderizar o MAPA
             for (int i = 0; i < MAP_HEIGHT_TILES; i++) {
@@ -1210,6 +1230,40 @@ int main(int argc, char* args[]) {
             
 
             // 2. Renderizar o Jogador
+
+
+            int animOffset = ((SDL_GetTicks() / 150) % 2) * 130; // Será 0 ou 100
+
+            if (jogador.hipnotizado || jogador.enrolado) {
+               c.x = 930; // Posição 7: Hipnotizado
+            } 
+            else if (estado == PARADO) {
+               c.x = 0;   // Posição 0: Parado
+            } 
+            else {
+               switch (direcaoOlhar) {
+                  case 0: // BAIXO -> Posições 1 e 2
+                      c.x = 130 + animOffset;
+                    break;
+                  case 3: // DIREITA -> Posições 3 e 4 
+                      int frameDir = (SDL_GetTicks() / 150) % 3; 
+                    
+                      if (frameDir == 0) c.x = 390;
+                      else if (frameDir == 1) c.x = 390 + 130; // 520
+                      else c.x = 1060; // O novo corte solicitado
+                    break;
+                  case 1: // CIMA -> Posições 5 e 6 
+                      c.x = 660 + animOffset;
+                    break;
+                  case 2: // ESQUERDA -> Posições 8 e 9 
+                      int frameDir1 = (SDL_GetTicks() / 150) % 3; 
+                    
+                      if (frameDir1 == 0) c.x = 1190;
+                      else if (frameDir1 == 1) c.x = 1190 + 130;
+                      else c.x = 1460; 
+                    break;
+            }
+        }
             SDL_RenderCopy(ren, img, &c, &r);
             
             // 3. Renderizar os inimigos
