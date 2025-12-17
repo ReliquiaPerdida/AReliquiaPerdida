@@ -21,7 +21,7 @@ const int WINDOW_HEIGHT = 768;
 #define MAP_HEIGHT_TILES 30
 #define TILE_SIZE 90
 #define RELIC_TILE 4
-#define MUMMY_COUNT 3
+#define MUMMY_COUNT 4
 #define DANCER_COUNT 4
 #define PLAYER_WIDTH 90
 #define PLAYER_HEIGHT 70
@@ -49,8 +49,8 @@ const int PLAYER_FRAME_H = 80;
 // --- MACROS E CONSTANTES DE RENDERIZAÇÃO ---
 const int MUMIA_FRAME_W = 48;
 const int MUMIA_FRAME_H = 64; 
-const int DANCA_FRAME_W = 23; // Largura do frame da Dançarina
-const int DANCA_FRAME_H = 35; // Altura do frame da Dançarina
+const int DANCA_FRAME_W = 25; // Largura do frame da Dançarina
+const int DANCA_FRAME_H = 33; // Altura do frame da Dançarina
 
 typedef enum {
     DIREITA = 1,
@@ -465,8 +465,7 @@ void initialize_phase(int phase_index, Jogador* jogador, Mumia mummies[], Dancar
 
     *visaoExtra = false; // Visão de tocha é resetada por fase.
     *possuiBussola = false; // Bússola é perdida ao mudar de fase
-    max_lives_total = 2;
-    
+ 
     snprintf(current_message, 256, "Entrando na Area %d! Colete a reliquia para avancar.", phase_index + 1);
     *message_start_time = SDL_GetTicks();
 }
@@ -475,6 +474,7 @@ void initialize_phase(int phase_index, Jogador* jogador, Mumia mummies[], Dancar
 void reset_game(Jogador* jogador, GlobalReliquia* relic, bool* visaoExtra, bool* possuiBussola, char current_message[], Uint32* message_start_time, Uint32* game_start_time, Mumia mummies[], Dancarina dancers[], Tesouro treasures[]) {
     // Resetar variáveis de jogo
     current_phase = 0;
+    max_lives_total = 2;
     jogador->vidas = max_lives_total;
     jogador->vida = 100;
     
@@ -510,7 +510,7 @@ int main(int argc, char* args[]) {
     srand(time(NULL));
 
 
-    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096) < 0) {
+    if (Mix_OpenAudio(48000, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
         fprintf(stderr, "SDL_mixer nao pode ser inicializado! Mix Error: %s\n", Mix_GetError());
     }
 
@@ -556,7 +556,7 @@ int main(int argc, char* args[]) {
     if (bgm_musica == NULL) {
         fprintf(stderr, "Falha ao carregar musica: %s\n", Mix_GetError());
     } else {
-        Mix_VolumeMusic(25); // Define o volume para ~25% (Range: 0 a 128)
+        Mix_VolumeMusic(20);
     }
     
     TTF_Font* font_small = TTF_OpenFont("tiny.ttf", 24); 
@@ -687,9 +687,21 @@ int main(int argc, char* args[]) {
            } 
             
             if (game_state == GAME_PLAYING) {
-                if (evt.type == SDL_KEYDOWN) {if (evt.key.keysym.sym == SDLK_F1) {
+                if (evt.type == SDL_KEYDOWN) {
+                    if (evt.key.keysym.sym == SDLK_F1) { // CHEAT Para ver a tela de vitória
                         game_end_time = SDL_GetTicks();
                         game_state = GAME_VICTORY;
+                    }
+                    if (evt.key.keysym.sym == SDLK_F2) {
+                        for (int i = 0; i < NUM_TREASURES_TO_SPAWN; i++) {
+                            if (treasures[i].tipo == TESOURO_CALICE_SAGRADO) {
+                                treasures[i].coletado = true; // Marca como pego
+                                jogador.vidas++;
+                                max_lives_total++;
+                                snprintf(current_message, 256, "[CHEAT] CALICE SAGRADO OBTIDO! Vida Extra Adicionada.");
+                                message_start_time = SDL_GetTicks();
+                             }
+                       }
                     }
                     if(!jogador.hipnotizado && !jogador.enrolado) {
                         switch (evt.key.keysym.sym) {
@@ -848,6 +860,7 @@ int main(int argc, char* args[]) {
                         
                         if (current_phase < NUM_AREAS) {
                             // Transição para a próxima área
+                            max_lives_total = 2;
                             initialize_phase(current_phase, &jogador, mummies, dancers, treasures, &global_relic, &visaoExtra, &possuiBussola, current_message, &message_start_time);
                         } else {
                             // FIM DO JOGO (Vitória final)
@@ -985,7 +998,13 @@ int main(int argc, char* args[]) {
                             mumia->estado = MUMIA_CONFUSA;
                             mumia->tempoEstado = SDL_GetTicks();
                         } else {
-                                if(mx > 0) move_x = 1; else move_x = -1;
+                                if(mx > 0) { 
+                                    move_x = 1; 
+                                    mumia->dirX = 1;
+                                } else { 
+                                    move_x = -1; 
+                                    mumia->dirX = -1;
+                                }
                                 if(my > 0) move_y = 1; else move_y = -1;
                         }
                         break;
@@ -1008,6 +1027,7 @@ int main(int argc, char* args[]) {
                             mumia->estado = MUMIA_ATORDOADA;
                             mumia->tempoEstado = SDL_GetTicks();
                             jogador.enrolado = false; 
+                            estado = PARADO;
                         }
                         break;
 
@@ -1230,10 +1250,13 @@ int main(int argc, char* args[]) {
             // 2. Renderizar o Jogador
 
 
-            int animOffset = ((SDL_GetTicks() / 150) % 2) * 130; // Será 0 ou 100
+            int animOffset = ((SDL_GetTicks() / 150) % 2) * 130; // Será 0 ou 130
 
-            if (jogador.hipnotizado || jogador.enrolado) {
+            if (jogador.hipnotizado) {
                c.x = 930; // Posição 7: Hipnotizado
+            }
+            else if (jogador.enrolado) {
+               c.x = 1590;
             } 
             else if (estado == PARADO) {
                c.x = 0;
@@ -1246,9 +1269,9 @@ int main(int argc, char* args[]) {
                   case 3: // DIREITA 
                       int frameDir = (SDL_GetTicks() / 150) % 3; 
                     
-                      if (frameDir == 0) c.x = 390;
-                      else if (frameDir == 1) c.x = 390 + 130; 
-                      else c.x = 1055;
+                      if (frameDir == 0) c.x = 395;
+                      else if (frameDir == 1) c.x = 395 + 130; 
+                      else c.x = 1060;
                     break;
                   case 1: // CIMA 
                       c.x = 660 + animOffset;
@@ -1293,23 +1316,44 @@ int main(int argc, char* args[]) {
                     cMumia.w = MUMIA_FRAME_W; // 48
                     cMumia.h = MUMIA_FRAME_H; // 64
                     cMumia.x = 0; // Posição X fixa no sprite sheet
+
+                int frameIndex = (SDL_GetTicks() / 150) % 3;
+                cMumia.x = frameIndex * 50;
         
              switch(mumia->estado) {
                  case MUMIA_DORMINDO: 
+                      cMumia.x = 0;
                       cMumia.y = 0 * MUMIA_FRAME_H; // LINHA 0
                  break;
                 
                  case MUMIA_PERSEGUINDO: 
-                     if (mumia->dirX > 0) {
-                         cMumia.y = 3 * MUMIA_FRAME_H; // LINHA 3: OLHANDO ESQUERDA (192 pixels de offset)
-                     } else {
-                         cMumia.y = 1 * MUMIA_FRAME_H; // LINHA 1: OLHANDO DIREITA
+                     int difX = jogador.x - mumia->x;
+                     int difY = jogador.y - mumia->y;
+
+                      // Se a distância vertical for maior que a horizontal
+                      if (abs(difY) > abs(difX)) {
+                           if (difY < 0) {
+                              // Múmia olha pra CIMA
+                              cMumia.y = 0 * MUMIA_FRAME_H; 
+                          } else {
+                              // Múmia olha pra BAIXO
+                              cMumia.y = 2 * MUMIA_FRAME_H; 
+                          }
+                      } 
+                       // Caso contrário, prioriza Esquerda/Direita
+                      else {
+                        if (difX < 0) {
+                           cMumia.y = 3 * MUMIA_FRAME_H; // Esquerda
+                      } else {
+                           cMumia.y = 1 * MUMIA_FRAME_H; // Direita
+                        }
                      }
                      break;
                 
                      case MUMIA_CONFUSA:
                      case MUMIA_ENROLANDO:
                      case MUMIA_ATORDOADA: 
+                         cMumia.x = 0;
                          cMumia.y = 2 * MUMIA_FRAME_H; // Linha 2: ACORDADA/PARADA/STUN
                      break;
               }
