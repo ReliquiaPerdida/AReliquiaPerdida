@@ -21,8 +21,8 @@ const int WINDOW_HEIGHT = 768;
 #define MAP_HEIGHT_TILES 30
 #define TILE_SIZE 90
 #define RELIC_TILE 4
-#define MUMMY_COUNT 3
-#define DANCER_COUNT 99
+#define MUMMY_COUNT 4
+#define DANCER_COUNT 3
 #define PLAYER_WIDTH 90
 #define PLAYER_HEIGHT 70
 #define MIN_SPAWN_DIST_TILES 5 
