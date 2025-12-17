@@ -10,7 +10,7 @@ A Relíquia Perdida é um jogo pixelart de exploração em que o personagem prin
 
 
 ### Diferencial
-A parte especial do está na aleatoriedade de inimigos, itens e armadilhas com efeitos únicos no usuário, fazendo com que o jogo incentive muito sua rejogabilidade.
+A parte especial está na aleatoriedade de inimigos, itens e armadilhas com efeitos únicos no usuário, fazendo com que o jogo incentive muito sua rejogabilidade.
 
 ## Níveis
 Nesse protótipo serão implementados três níveis. 
