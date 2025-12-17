@@ -14,15 +14,15 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-const int WINDOW_WIDTH = 1366; 
-const int WINDOW_HEIGHT = 768;
+const int WINDOW_WIDTH = 1920; 
+const int WINDOW_HEIGHT = 1080;
 // --- Configurações do Mapa ---
 #define MAP_WIDTH_TILES 30
-#define MAP_HEIGHT_TILES 30
+#define MAP_HEIGHT_TILES 15
 #define TILE_SIZE 90
 #define RELIC_TILE 4
-#define MUMMY_COUNT 4
-#define DANCER_COUNT 4
+#define MUMMY_COUNT 3
+#define DANCER_COUNT 3
 #define PLAYER_WIDTH 90
 #define PLAYER_HEIGHT 70
 #define MIN_SPAWN_DIST_TILES 5 
@@ -54,7 +54,9 @@ const int DANCA_FRAME_H = 33; // Altura do frame da Dançarina
 
 typedef enum {
     DIREITA = 1,
-    ESQUERDA = -1
+    ESQUERDA = -1,
+    CIMA = 2,
+    BAIXO = -2
 } DirecaoVisual;
 
 // --- ESTADO DO JOGO ---
@@ -164,7 +166,7 @@ int map0[15][30] = {
     {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
     {1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1},
     {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,0,1,1,1,1,1,1,1,0,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,1,4,1},
+    {1,0,1,1,1,1,1,1,1,0,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,1,0,1},
     {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
     {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
 };
@@ -183,7 +185,7 @@ int map1[15][30] = {
     {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
     {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1},
     {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,4,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1},
+    {1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1},
     {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
     {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
 };
@@ -202,7 +204,7 @@ int map2[15][30] = {
     {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
     {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1},
     {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,4,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1},
+    {1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1},
     {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
     {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
 };
@@ -254,36 +256,45 @@ void update_position(int* x, int* y, int dx, int dy) {
 
 // animar a dancarina
 void aux_dancarina(Dancarina* danca) {
-    if (danca->direcaoDanca > 0) {
-        danca->direcaoVisual = DIREITA;
-    } else if (danca->direcaoDanca < 0) {
-        danca->direcaoVisual = ESQUERDA;
-    }
-    
     danca->frameRecorte.w = DANCA_FRAME_W;
     danca->frameRecorte.h = DANCA_FRAME_H;
-    danca->frameRecorte.x = 0; 
+    
+    // Animação simples de troca de frame baseada no tempo
+    int frameSimples = (SDL_GetTicks() / 200) % 2; 
+    danca->frameRecorte.x = frameSimples * DANCA_FRAME_W; 
 
     switch (danca->estadoAtual) {
         case HIPNOTIZANDO:
-            danca->frameRecorte.y = 2 * DANCA_FRAME_H; // Linha 2: Centralizada/Hipnose
+            danca->frameRecorte.y = 2 * DANCA_FRAME_H; 
             break;
             
         case DANCANDO:
-            if (danca->direcaoVisual == DIREITA) {
-                danca->frameRecorte.y = 1 * DANCA_FRAME_H; // Linha 1: Direita
+             if (danca->direcaoDanca > 0) {
+                danca->direcaoVisual = DIREITA;
+             } else if (danca->direcaoDanca < 0) {
+                danca->direcaoVisual = ESQUERDA;
+             }
+             if (danca->direcaoVisual == DIREITA) {
+                danca->frameRecorte.y = 1 * DANCA_FRAME_H;
             } else { 
-                danca->frameRecorte.y = 3 * DANCA_FRAME_H; // Linha 3: Esquerda
+                danca->frameRecorte.y = 3 * DANCA_FRAME_H;
+            }
+            break;
+        case PARADA:
+            if (danca->direcaoVisual == CIMA) {
+                danca->frameRecorte.y = 0 * DANCA_FRAME_H; //  Cima
+            } else if (danca->direcaoVisual == DIREITA) {
+                danca->frameRecorte.y = 1 * DANCA_FRAME_H; // Direita
+            } else if (danca->direcaoVisual == BAIXO) {
+                danca->frameRecorte.y = 2 * DANCA_FRAME_H; //  Baixo
+            } else if (danca->direcaoVisual == ESQUERDA) {
+                danca->frameRecorte.y = 3 * DANCA_FRAME_H; // Esquerda
             }
             break;
 
         case ATORDOADA:
-            danca->frameRecorte.y = 2 * DANCA_FRAME_H; // Linha 2: Atordoada
-            break;
-
-        case PARADA:
-        default:
-            danca->frameRecorte.y = 0 * DANCA_FRAME_H; // Linha 0: Costas/Parada
+            danca->frameRecorte.x = 0;
+            danca->frameRecorte.y = 2 * DANCA_FRAME_H; 
             break;
     }
 }
@@ -376,6 +387,7 @@ const char* obter_direcao_reliquia(int px, int py, int rx, int ry) {
 void initialize_phase(int phase_index, Jogador* jogador, Mumia mummies[], Dancarina dancers[], Tesouro treasures[], GlobalReliquia* relic, bool* visaoExtra, bool* possuiBussola, char current_message[], Uint32* message_start_time) {
     
     current_map = ALL_MAPS[phase_index]; // Define o mapa atual
+    relic->coletada[phase_index] = false;
     
     // 1. Encontrar a Posição Inicial (Tile '2') do NOVO mapa
     int start_x = 0, start_y = 0;
@@ -401,19 +413,37 @@ void initialize_phase(int phase_index, Jogador* jogador, Mumia mummies[], Dancar
     if (jogador->vida <= 20) jogador->vida = 50; 
     
     // 3. Inicializar Relíquia da Fase
-    // Encontra o tile 4 NO NOVO MAPA
-    bool found_relic = false;
-    for (int i = 0; i < MAP_HEIGHT_TILES; i++) {
-        for (int j = 0; j < MAP_WIDTH_TILES; j++) {
-            if (current_map[i][j] == RELIC_TILE) {
-                relic->x = j * TILE_SIZE + (TILE_SIZE - 30) / 2;
-                relic->y = i * TILE_SIZE + (TILE_SIZE - 30) / 2;
-                found_relic = true;
-                break;
-            }
+    int rx, ry;
+    int dist_minima_reliquia = 10; 
+
+     // lógica de busca de spawn
+    int max_attempts = 1000;
+    int attempts = 0;
+    bool found_random_relic = false;
+
+    while (attempts < max_attempts) {
+        int rand_tile_x = 1 + rand() % (MAP_WIDTH_TILES - 2);
+        int rand_tile_y = 1 + rand() % (MAP_HEIGHT_TILES - 2);
+
+        // Verifica se o tile é chão (0)
+        if (current_map[rand_tile_y][rand_tile_x] == 0) {
+           int pot_x = rand_tile_x * TILE_SIZE + (TILE_SIZE - 30) / 2;
+           int pot_y = rand_tile_y * TILE_SIZE + (TILE_SIZE - 30) / 2;
+
+           int dx = pot_x - jogador->x;
+           int dy = pot_y - jogador->y;
+           int dist2 = dx*dx + dy*dy;
+
+        // Verifica se está a pelo menos 10 tiles de distância (dist_minima * TILE_SIZE)^2
+           if (dist2 > (dist_minima_reliquia * TILE_SIZE) * (dist_minima_reliquia * TILE_SIZE)) {
+              relic->x = pot_x;
+              relic->y = pot_y;
+              found_random_relic = true;
+              break;
+           }
         }
-        if (found_relic) break;
-    }
+        attempts++;
+        }
 
     // 4. Repopular/Respawnar Inimigos e Tesouros
     for(int i = 0; i < MUMMY_COUNT; i++) {
@@ -906,6 +936,14 @@ int main(int argc, char* args[]) {
                                 }
                             }
 
+   
+                            if (abs(danca->dirY) > abs(danca->dirX)) {
+                                   if (danca->dirY < 0) danca->direcaoVisual = CIMA; 
+                                   else if (danca->dirY > 0) danca->direcaoVisual = BAIXO; 
+                            } else if (abs(danca->dirX) > abs(danca->dirY)) {
+                                   if (danca->dirX > 0) danca->direcaoVisual = DIREITA; 
+                                   else if (danca->dirX < 0) danca->direcaoVisual = ESQUERDA; 
+                            }
                             move_x = danca->dirX * vel_parada;
                             move_y = danca->dirY * vel_parada;
                         }
