@@ -21,8 +21,8 @@ const int WINDOW_HEIGHT = 768;
 #define MAP_HEIGHT_TILES 30
 #define TILE_SIZE 90
 #define RELIC_TILE 4
-#define MUMMY_COUNT 4
-#define DANCER_COUNT 3
+#define MUMMY_COUNT 3
+#define DANCER_COUNT 4
 #define PLAYER_WIDTH 90
 #define PLAYER_HEIGHT 70
 #define MIN_SPAWN_DIST_TILES 5 
@@ -663,8 +663,7 @@ int main(int argc, char* args[]) {
         int isevt;
 
 
-
-        if (game_state == GAME_PLAYING) { isevt = AUX_WaitEventTimeout(&evt, &espera); } else { isevt = SDL_PollEvent(&evt); }
+        if (game_state == GAME_PLAYING) { isevt = AUX_WaitEventTimeout(&evt, &espera); SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE);} else { isevt = SDL_PollEvent(&evt); }
         const Uint8* teclas = SDL_GetKeyboardState(NULL);
 
         
@@ -1237,29 +1236,29 @@ int main(int argc, char* args[]) {
                c.x = 930; // Posição 7: Hipnotizado
             } 
             else if (estado == PARADO) {
-               c.x = 0;   // Posição 0: Parado
+               c.x = 0;
             } 
             else {
                switch (direcaoOlhar) {
-                  case 0: // BAIXO -> Posições 1 e 2
+                  case 0: // BAIXO 
                       c.x = 130 + animOffset;
                     break;
-                  case 3: // DIREITA -> Posições 3 e 4 
+                  case 3: // DIREITA 
                       int frameDir = (SDL_GetTicks() / 150) % 3; 
                     
                       if (frameDir == 0) c.x = 390;
-                      else if (frameDir == 1) c.x = 390 + 130; // 520
-                      else c.x = 1060; // O novo corte solicitado
+                      else if (frameDir == 1) c.x = 390 + 130; 
+                      else c.x = 1055;
                     break;
-                  case 1: // CIMA -> Posições 5 e 6 
+                  case 1: // CIMA 
                       c.x = 660 + animOffset;
                     break;
-                  case 2: // ESQUERDA -> Posições 8 e 9 
+                  case 2: // ESQUERDA 
                       int frameDir1 = (SDL_GetTicks() / 150) % 3; 
                     
                       if (frameDir1 == 0) c.x = 1190;
                       else if (frameDir1 == 1) c.x = 1190 + 130;
-                      else c.x = 1460; 
+                      else c.x = 1455; 
                     break;
             }
         }
