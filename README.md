@@ -28,7 +28,12 @@ São itens com efeitos diversos, desconhecidos até o primeiro uso.
 * `Bússola:` Mostra a localização da relíquia em relaçã á posição atual do personagem (Norte, Sul, Leste, Oeste, etc.);
 
 ### Relíquias
-Para zerar o jogo, as três relíquias devem ser coletadas. Eles serão colocadas aleatoriamente pelas áreas, cada área possui uma relíquia.
+Para zerar o jogo, as três relíquias devem ser coletadas. Elas serão colocadas aleatoriamente pelas áreas, cada área possui uma relíquia.
 
 
 Detalhes serão adicionados ou modificados no decorrer do desenvolvimento do jogo conforme o grupo for verificando a viabilidade da implementação das mecânicas idealizadas.
+
+### Fora de escopo
+Geração procedural de mapas;
+Armadilhas;
+Sistema de combate;
