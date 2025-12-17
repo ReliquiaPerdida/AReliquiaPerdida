@@ -718,21 +718,6 @@ int main(int argc, char* args[]) {
             
             if (game_state == GAME_PLAYING) {
                 if (evt.type == SDL_KEYDOWN) {
-                    if (evt.key.keysym.sym == SDLK_F1) { // CHEAT Para ver a tela de vitória
-                        game_end_time = SDL_GetTicks();
-                        game_state = GAME_VICTORY;
-                    }
-                    if (evt.key.keysym.sym == SDLK_F2) {
-                        for (int i = 0; i < NUM_TREASURES_TO_SPAWN; i++) {
-                            if (treasures[i].tipo == TESOURO_CALICE_SAGRADO) {
-                                treasures[i].coletado = true; // Marca como pego
-                                jogador.vidas++;
-                                max_lives_total++;
-                                snprintf(current_message, 256, "[CHEAT] CALICE SAGRADO OBTIDO! Vida Extra Adicionada.");
-                                message_start_time = SDL_GetTicks();
-                             }
-                       }
-                    }
                     if(!jogador.hipnotizado && !jogador.enrolado) {
                         switch (evt.key.keysym.sym) {
                             case SDLK_LSHIFT: if(noChao) estado = CORRENDO; break;
