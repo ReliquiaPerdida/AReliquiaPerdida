@@ -814,7 +814,6 @@ int main(int argc, char* args[]) {
                             snprintf(current_message, 256, "CALICE SAGRADO Coletado! Voce foi abencoado com uma nova vida.");
                             jogador.vidas++;
                             max_lives_total++;
-                            vidaextra = true;
                             break;
                         case TESOURO_BUSSOLA:
                             snprintf(current_message, 256, "BUSSOLA ENCONTRADA! Siga a bussola para encontrar a reliquia!");
